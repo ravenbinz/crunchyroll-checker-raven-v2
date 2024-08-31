@@ -58,50 +58,55 @@ def check_crunchyroll_account(username, password):
 
     subscription_info = subscription_response.json()
 
-    if "subscription_country" not in subscription_info:
+    if "subscription_country" not in subscription_info or "subscription_plan" not in subscription_info:
         return {"status": "free", "message": "Free account or no subscription found."}
     
     country_code = subscription_info["subscription_country"]
-    country_dict = {
-        "AF": "Afghanistan 🇦🇫",
-        "AT": "Austria 🇦🇹",
-        "AX": "Åland Islands 🇦🇽",
-        "AL": "Albania 🇦🇱",
-        "DZ": "Algeria 🇩🇿",
-        "AS": "American Samoa 🇦🇸",
-        "AD": "Andorra 🇦🇩",
-        "AO": "Angola 🇦🇴",
-        "AI": "Anguilla 🇦🇮",
-        "AG": "Antigua and Barbuda 🇦🇬",
-        "AR": "Argentina 🇦🇷",
-        "AM": "Armenia 🇦🇲",
-        "AW": "Aruba 🇦🇼",
-        "AU": "Australia 🇦🇺",
-        "AZ": "Azerbaijan 🇦🇿",
-        "BS": "Bahamas 🇧🇸",
-        "BH": "Bahrain 🇧🇭",
-        "BD": "Bangladesh 🇧🇩",
-        "BB": "Barbados 🇧🇧",
-        "BY": "Belarus 🇧🇾",
-        "BE": "Belgium 🇧🇪",
-        "BZ": "Belize 🇧🇿",
-        "BJ": "Benin 🇧🇯",
-        "BM": "Bermuda 🇧🇲",
-        "BT": "Bhutan 🇧🇹",
-        "BO": "Bolivia 🇧🇴",
-        "BA": "Bosnia and Herzegovina 🇧🇦",
-        "BW": "Botswana 🇧🇼",
-        "BR": "Brazil 🇧🇷",
-    }
+    plan = subscription_info.get("subscription_plan", "Unknown Plan")
 
-    country_name = country_dict.get(country_code, "Unknown Country")
+    if plan.lower() in ["mega fan membership", "premium", "other premium plans"]:  # Adjust this condition as needed
+        country_dict = {
+            "AF": "Afghanistan 🇦🇫",
+            "AT": "Austria 🇦🇹",
+            "AX": "Åland Islands 🇦🇽",
+            "AL": "Albania 🇦🇱",
+            "DZ": "Algeria 🇩🇿",
+            "AS": "American Samoa 🇦🇸",
+            "AD": "Andorra 🇦🇩",
+            "AO": "Angola 🇦🇴",
+            "AI": "Anguilla 🇦🇮",
+            "AG": "Antigua and Barbuda 🇦🇬",
+            "AR": "Argentina 🇦🇷",
+            "AM": "Armenia 🇦🇲",
+            "AW": "Aruba 🇦🇼",
+            "AU": "Australia 🇦🇺",
+            "AZ": "Azerbaijan 🇦🇿",
+            "BS": "Bahamas 🇧🇸",
+            "BH": "Bahrain 🇧🇭",
+            "BD": "Bangladesh 🇧🇩",
+            "BB": "Barbados 🇧🇧",
+            "BY": "Belarus 🇧🇾",
+            "BE": "Belgium 🇧🇪",
+            "BZ": "Belize 🇧🇿",
+            "BJ": "Benin 🇧🇯",
+            "BM": "Bermuda 🇧🇲",
+            "BT": "Bhutan 🇧🇹",
+            "BO": "Bolivia 🇧🇴",
+            "BA": "Bosnia and Herzegovina 🇧🇦",
+            "BW": "Botswana 🇧🇼",
+            "BR": "Brazil 🇧🇷",
+        }
 
-    return {
-        "status": "success",
-        "account_id": account_id,
-        "subscription_country": country_name,
-        "subscription_info": subscription_info
-    }
+        country_name = country_dict.get(country_code, "Unknown Country")
+
+        return {
+            "status": "success",
+            "account_id": account_id,
+            "subscription_country": country_name,
+            "subscription_info": subscription_info
+        }
+    else:
+        return {"status": "free", "message": "Non-premium account."}
 
 def process_accounts(input_path, output_path):
     print(f"Processing file: {input_path}")
@@ -122,9 +127,9 @@ def process_accounts(input_path, output_path):
                         outfile.write(valid_info + "\n")
                         print(f"Valid account found and saved: {valid_info}")
                     else:
-                        outfile.write(f"{username}: {result['status']} - {result['message']}\n")
+                        print(f"Account {username}: {result['status']} - {result['message']}")
                 
-        print(f"Processing complete. Results saved to {output_path}.")
+        print(f"Processing complete. Valid accounts saved to {output_path}.")
     
     except FileNotFoundError:
         print(f"Error: The file at {input_path} was not found.")
@@ -135,4 +140,4 @@ if __name__ == "__main__":
     input_path = input("Enter the path to the accounts file (e.g., /storage/emulated/0/Download/crunchyroll.txt): ")
     output_path = input("Enter the path to save valid accounts (e.g., /storage/emulated/0/Download/valid_accounts.txt): ")
     process_accounts(input_path, output_path)
-    
+        
