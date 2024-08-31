@@ -108,27 +108,20 @@ def process_accounts(file_path, output_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             accounts = file.readlines()
         
-        valid_accounts = []
-        
-        for line in accounts:
-            username, password = line.strip().split(':')
-            print(f"Checking account: {username}")
-            result = check_crunchyroll_account(username, password)
+        with open(output_path, 'w', encoding='utf-8') as file:
+            for line in accounts:
+                username, password = line.strip().split(':')
+                print(f"Checking account: {username}")
+                result = check_crunchyroll_account(username, password)
+                
+                if result["status"] == "success":
+                    print(f"Valid account found: {username}")
+                    file.write(f"{username}:{password}\n")
+                else:
+                    print(f"Account {username}: Status: {result['status']}, Message: {result['message']}")
             
-            if result["status"] == "success":
-                print(f"Valid account found: {username}")
-                valid_accounts.append(f"{username}:{password}")
-            else:
-                print(f"Account {username}: Status: {result['status']}, Message: {result['message']}")
-        
-        if valid_accounts:
-            with open(output_path, 'w', encoding='utf-8') as file:
-                for account in valid_accounts:
-                    file.write(account + "\n")
             print(f"Valid accounts saved to {output_path}")
-        else:
-            print("No valid accounts found.")
-    
+
     except FileNotFoundError:
         print("File not found. Please check the file path.")
     except Exception as e:
@@ -138,4 +131,4 @@ if __name__ == "__main__":
     input_path = input("Enter the path to the accounts file (e.g., /storage/emulated/0/Download/crunchyroll.txt): ")
     output_path = input("Enter the path to save valid accounts (e.g., /storage/emulated/0/Download/valid_accounts.txt): ")
     process_accounts(input_path, output_path)
-  
+    
