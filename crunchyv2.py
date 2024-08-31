@@ -133,7 +133,7 @@ def process_accounts(input_path, output_path):
                         print(f"Valid account found and saved: {valid_info}")
                     
                     # Introduce a delay to avoid rate limiting
-                    time.sleep(5)  # Adjust the delay as needed (in seconds)
+                    time.sleep(3)  # Adjust the delay as needed (in seconds)
                 
         print(f"Processing complete. Valid accounts saved to {output_path}.")
     
