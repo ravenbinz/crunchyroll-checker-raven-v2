@@ -77,7 +77,6 @@ def check_crunchyroll_account(username, password):
         "AM": "Armenia 🇦🇲",
         "AW": "Aruba 🇦🇼",
         "AU": "Australia 🇦🇺",
-        "AT": "Austria 🇦🇹",
         "AZ": "Azerbaijan 🇦🇿",
         "BS": "Bahamas 🇧🇸",
         "BH": "Bahrain 🇧🇭",
@@ -110,7 +109,7 @@ def process_accounts(input_path, output_path):
         with open(input_path, 'r', encoding='utf-8') as infile:
             accounts = infile.readlines()
         
-        with open(output_path, 'w', encoding='utf-8') as outfile:
+        with open(output_path, 'a', encoding='utf-8') as outfile:  # Open in append mode
             for line in accounts:
                 if ':' in line:
                     username, password = line.strip().split(':', 1)
